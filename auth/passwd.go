@@ -32,14 +32,14 @@ func convertPassword(passwordC *C.struct_passwd) *Password {
 	}
 }
 
-// Go wrapper around `getpwnam`
+// Go wrapper around `getpwnam()`
 // Get password file entry corresponding to given username.
 func GetPasswordName(name string) (*Password, error) {
 	nameC := C.CString(name)
 	defer C.free(unsafe.Pointer(nameC))
 	passwordC, err := C.getpwnam(nameC)
 
-	// If matching passwd record cannot be found, `getpwnam` should return
+	// If matching password record cannot be found, `getpwnam()` should return
 	// NULL and leave `errno` unchanged.
 	if passwordC == nil {
 		if err == nil {
@@ -51,13 +51,13 @@ func GetPasswordName(name string) (*Password, error) {
 	return convertPassword(passwordC), nil
 }
 
-// Go wrapper around `getpwuid`
+// Go wrapper around `getpwuid()`
 // Get password file entry corresponding to given UID.
 func GetPasswordUid(uid uint32) (*Password, error) {
 	uidC := C.__uid_t(uid)
 	passwordC, err := C.getpwuid(uidC)
 
-	// If matching passwd record cannot be found, `getpwuid` should return
+	// If matching password record cannot be found, `getpwuid()` should return
 	// NULL and leave `errno` unchanged.
 	if passwordC == nil {
 		if err == nil {
