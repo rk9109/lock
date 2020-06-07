@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/BurntSushi/xgb"
 	"github.com/BurntSushi/xgb/xproto"
@@ -30,11 +31,11 @@ func NewLockscreen() (*Lockscreen, error) {
 }
 
 func (l *Lockscreen) Lock() error {
-    window, err := xproto.NewWindowId(l.conn)
+	window, err := xproto.NewWindowId(l.conn)
 	if err != nil {
 		return err
 	}
-    l.window = window
+	l.window = window
 
 	mask := 0
 	values := make([]uint32, 3)
@@ -62,6 +63,11 @@ func (l *Lockscreen) Lock() error {
 		values,
 	)
 
+	err = l.GrabPointerKeyboard()
+	if err != nil {
+		return err
+	}
+
 	err = xproto.MapWindowChecked(l.conn, l.window).Check()
 	if err != nil {
 		return err
@@ -71,16 +77,55 @@ func (l *Lockscreen) Lock() error {
 
 func (l *Lockscreen) Unlock() error {
 	// TODO
-    return nil
-}
+	xproto.UngrabPointer(l.conn, 0)
+	xproto.UngrabKeyboard(l.conn, 0)
 
-func grabPointerKeyboard() error {
-	// TODO
 	return nil
 }
 
-func ungrabPointerKeyboard() error {
-	// TODO
+func (l *Lockscreen) GrabPointerKeyboard() error {
+	var pointerGrab *xproto.GrabPointerReply
+	var keyboardGrab *xproto.GrabKeyboardReply
+
+	for i := 0; i < 10; i++ {
+		if pointerGrab == nil || pointerGrab.Status != xproto.GrabStatusSuccess {
+			pointerGrab, _ = xproto.GrabPointer(
+				l.conn,
+				false,
+				l.screen.Root,
+				0,
+				xproto.GrabModeAsync,
+				xproto.GrabModeAsync,
+				0,
+				0,
+				0,
+			).Reply()
+		}
+
+		if keyboardGrab == nil || keyboardGrab.Status != xproto.GrabStatusSuccess {
+			keyboardGrab, _ = xproto.GrabKeyboard(
+				l.conn,
+				true,
+				l.screen.Root,
+				0,
+				xproto.GrabModeAsync,
+				xproto.GrabModeAsync,
+			).Reply()
+		}
+
+		if pointerGrab.Status == xproto.GrabStatusSuccess &&
+			keyboardGrab.Status == xproto.GrabStatusSuccess {
+			break
+		}
+
+		time.Sleep(100 * time.Millisecond)
+	}
+
+	if pointerGrab.Status != xproto.GrabStatusSuccess ||
+		keyboardGrab.Status != xproto.GrabStatusSuccess {
+		return errors.New("Unable to grab pointer and keyboard.")
+	}
+
 	return nil
 }
 

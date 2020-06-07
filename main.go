@@ -6,17 +6,17 @@ import (
 )
 
 func run() error {
-    lockscreen, err := NewLockscreen()
-    if err != nil {
-        return err
-    }
-    err = lockscreen.Lock()
-    if err != nil {
-        return err
-    }
-    lockscreen.xEventLoop()
+	lockscreen, err := NewLockscreen()
+	if err != nil {
+		return err
+	}
+	err = lockscreen.Lock()
+	if err != nil {
+		return err
+	}
+	lockscreen.xEventLoop()
 
-    return nil
+	return nil
 }
 
 func main() {
