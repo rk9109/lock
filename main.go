@@ -3,10 +3,12 @@ package main
 import (
 	"fmt"
 	"os"
+
+	"github.com/rk9109/xgolock/graphics"
 )
 
 func run() error {
-	lockscreen, err := NewLockscreen()
+	lockscreen, err := graphics.NewLockscreen()
 	if err != nil {
 		return err
 	}
@@ -14,7 +16,7 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	lockscreen.xEventLoop()
+	lockscreen.EventLoop()
 
 	return nil
 }

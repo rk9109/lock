@@ -1,8 +1,7 @@
-package main
+package graphics
 
 import (
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/BurntSushi/xgb"
@@ -56,7 +55,7 @@ func (l *Lockscreen) Lock() error {
 		l.screen.RootDepth,
 		l.window,
 		l.screen.Root,
-		0, 0, 500, 500, 0,
+		0, 0, 100, 100, 0,
 		xproto.WindowClassInputOutput,
 		l.screen.RootVisual,
 		uint32(mask),
@@ -127,19 +126,4 @@ func (l *Lockscreen) GrabPointerKeyboard() error {
 	}
 
 	return nil
-}
-
-func (l *Lockscreen) xEventLoop() error {
-	for {
-		event, xerr := l.conn.WaitForEvent()
-		if event == nil && xerr == nil {
-			return errors.New("X event loop error")
-		}
-		if event != nil {
-			fmt.Printf("Event: %s\n", event)
-		}
-		if xerr != nil {
-			fmt.Printf("Error: %s\n", xerr)
-		}
-	}
 }
